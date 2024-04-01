@@ -10,7 +10,7 @@ import (
 
 type Config struct {
 	Env              string        `hcl:"env" env:"ENV" default:"local"`
-	DatabaseDSN      string        `hcl:"database_dsn" env:"DB_DSN" default:"postgres://postgres:postgres@localhost:5442/postgres?sslmode=disable"`
+	DatabaseDSN      string        `hcl:"database_dsn" env:"DB_DSN" default:"postgres://postgres:postgres@localhost:5442/calc_db?sslmode=disable"`
 	GoroutineNumber  int           `hcl:"goroutine_number" env:"GOROUTINE_NUMBER" default:"5"`
 	OrchestratorURL  string        `hcl:"orchestrator_url" env:"ORCHESTRATOR_URL" default:"http://localhost:5441"`
 	WorkerTimeout    time.Duration `hcl:"worker_timeout" env:"WORKER_TIMEOUT" default:"1m"`
@@ -18,6 +18,7 @@ type Config struct {
 	FetcherInterval  time.Duration `hcl:"fetcher_interval" env:"FETCHER_INTERVAL" default:"10s"`
 	CheckerInterval  time.Duration `hcl:"checker_interval" env:"CHECKER_INTERVAL" default:"10s"`
 	MigrationPath    string        `hcl:"migration_path" env:"MIGRATION_PATH" default:"./internal/storage/migrations"`
+	GrpcPort         int           `hcl:"grpc_port" env:"GRPC_PORT" default:"50051"`
 }
 
 var (

@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/jmoiron/sqlx"
 	"github.com/k6mil6/distributed-calculator/internal/config"
+	"github.com/k6mil6/distributed-calculator/internal/orchestrator/app"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/checker"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/fetcher"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http_server/handlers/agents/free_expressions"
@@ -64,12 +65,18 @@ func main() {
 	c := checker.New(subExpressionStorage, cfg.CheckerInterval, log)
 
 	srv := &http.Server{
-		Addr:    ":5432",
+		Addr:    ":8080",
 		Handler: router,
 	}
 
 	go f.Start(ctx)
 	go c.Start(ctx)
+
+	application := app.New(log, cfg.GrpcPort, subExpressionStorage)
+
+	go func() {
+		application.GRPCServer.MustRun()
+	}()
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
@@ -77,9 +84,11 @@ func main() {
 		}
 	}()
 
-	log.Info("server started")
+	log.Info("server started", slog.String("address", srv.Addr))
 
 	<-ctx.Done()
-	log.Info("server stopped")
 
+	application.GRPCServer.Stop()
+	log.Info("gRPC server stopped")
+	log.Info("server stopped")
 }
