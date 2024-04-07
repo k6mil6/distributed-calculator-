@@ -1,4 +1,4 @@
-package subexpression_remaker
+package remaker
 
 import (
 	"fmt"

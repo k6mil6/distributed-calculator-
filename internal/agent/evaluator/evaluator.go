@@ -3,18 +3,18 @@ package evaluator
 import (
 	"fmt"
 	"github.com/Knetic/govaluate"
-	"github.com/k6mil6/distributed-calculator/internal/agent/response"
+	"github.com/k6mil6/distributed-calculator/internal/model"
 	"log/slog"
 	"reflect"
 	"time"
 )
 
 type Result struct {
-	Id     int     `json:"id"`
-	Result float64 `json:"result"`
+	Id     int
+	Result float64
 }
 
-func Evaluate(response response.Response, heartbeat time.Duration, ch chan int, workerId int, logger *slog.Logger) (Result, error) {
+func Evaluate(subexpression model.Subexpression, heartbeat time.Duration, ch chan int, workerId int, logger *slog.Logger) (Result, error) {
 	ticker := time.NewTicker(heartbeat)
 	defer ticker.Stop()
 
@@ -32,14 +32,14 @@ func Evaluate(response response.Response, heartbeat time.Duration, ch chan int, 
 		}
 	}()
 
-	timer := time.NewTimer(time.Duration(response.Timeout) * time.Second)
+	timer := time.NewTimer(time.Duration(subexpression.Timeout) * time.Second)
 
 	<-timer.C
 
 	ticker.Stop()
 
-	logger.Info("expression timeout has gone, starting evaluation", slog.Int("worker_id", workerId), slog.Any("expression", response.Subexpression), slog.Any("timeout", time.Duration(response.Timeout)*time.Second))
-	exp, err := govaluate.NewEvaluableExpression(response.Subexpression)
+	logger.Info("expression timeout has gone, starting evaluation", slog.Int("worker_id", workerId), slog.Any("expression", subexpression.Subexpression), slog.Any("timeout", time.Duration(subexpression.Timeout)*time.Second))
+	exp, err := govaluate.NewEvaluableExpression(subexpression.Subexpression)
 	if err != nil {
 		return Result{}, err
 	}
@@ -61,7 +61,7 @@ func Evaluate(response response.Response, heartbeat time.Duration, ch chan int, 
 	// signal that the evaluation is complete.
 	done <- struct{}{}
 
-	return Result{Id: response.Id, Result: resFloat}, nil
+	return Result{Id: subexpression.ID, Result: resFloat}, nil
 }
 
 func getFloat(unk interface{}, floatType reflect.Type) (float64, error) {

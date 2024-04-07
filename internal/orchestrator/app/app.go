@@ -15,8 +15,9 @@ func New(
 	log *slog.Logger,
 	grpcPort int,
 	subExpressionStorage *postgres.SubexpressionStorage,
+	ch chan bool,
 ) *App {
-	orchestrator := orchestratorService.New(log, subExpressionStorage, subExpressionStorage)
+	orchestrator := orchestratorService.New(log, subExpressionStorage, subExpressionStorage, ch)
 
 	grpcApp := grpcapp.New(log, grpcPort, orchestrator)
 

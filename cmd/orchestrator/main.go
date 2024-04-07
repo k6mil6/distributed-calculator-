@@ -9,8 +9,7 @@ import (
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/app"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/checker"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/fetcher"
-	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http_server/handlers/agents/free_expressions"
-	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http_server/handlers/agents/result"
+	"github.com/k6mil6/distributed-calculator/internal/orchestrator/finaliser"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http_server/handlers/expression/all_expressions"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http_server/handlers/expression/calculate"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http_server/handlers/expression/expression"
@@ -43,7 +42,7 @@ func main() {
 	defer cancel()
 
 	expressionStorage := postgres.NewExpressionStorage(db)
-	subExpressionStorage := postgres.NewSubExpressionStorage(db)
+	subexpressionStorage := postgres.NewSubexpressionStorage(db)
 	timeoutsStorage := postgres.NewTimeoutsStorage(db)
 
 	router := chi.NewRouter()
@@ -53,16 +52,17 @@ func main() {
 	router.Use(middleware.URLFormat)
 
 	router.Post("/calculate", calculate.New(log, expressionStorage, ctx))
-	router.Post("/result", result.New(log, subExpressionStorage, ctx))
 	router.Post("/set_timeouts", set_timeouts.New(log, timeoutsStorage, ctx))
 
-	router.Get("/free_expressions", free_expressions.New(log, subExpressionStorage, ctx))
-	router.Get("/all_expressions", all_expressions.New(log, expressionStorage, subExpressionStorage, ctx))
-	router.Get("/expression/{id}", expression.New(log, expressionStorage, subExpressionStorage, ctx))
+	router.Get("/all_expressions", all_expressions.New(log, expressionStorage, ctx))
+	router.Get("/expression/{id}", expression.New(log, expressionStorage, ctx))
 	router.Get("/actual_timeouts", actual_timeouts.New(log, timeoutsStorage, ctx))
 
-	f := fetcher.New(expressionStorage, subExpressionStorage, cfg.FetcherInterval, log)
-	c := checker.New(subExpressionStorage, cfg.CheckerInterval, log)
+	f := fetcher.New(expressionStorage, subexpressionStorage, cfg.FetcherInterval, log)
+	c := checker.New(subexpressionStorage, cfg.CheckerInterval, log)
+	fin := finaliser.New(log, subexpressionStorage, expressionStorage)
+
+	ch := make(chan bool, 1)
 
 	srv := &http.Server{
 		Addr:    ":8080",
@@ -71,8 +71,9 @@ func main() {
 
 	go f.Start(ctx)
 	go c.Start(ctx)
+	go fin.Start(ctx, ch)
 
-	application := app.New(log, cfg.GrpcPort, subExpressionStorage)
+	application := app.New(log, cfg.GrpcPort, subexpressionStorage, ch)
 
 	go func() {
 		application.GRPCServer.MustRun()

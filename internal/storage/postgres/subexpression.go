@@ -15,7 +15,7 @@ type SubexpressionStorage struct {
 	db *sqlx.DB
 }
 
-func NewSubExpressionStorage(db *sqlx.DB) *SubexpressionStorage {
+func NewSubexpressionStorage(db *sqlx.DB) *SubexpressionStorage {
 	return &SubexpressionStorage{
 		db: db,
 	}

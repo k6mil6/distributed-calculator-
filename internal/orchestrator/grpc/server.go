@@ -2,7 +2,9 @@ package grpc
 
 import (
 	"context"
+	"errors"
 	distributedcalculatorv1 "github.com/k6mil6/distributed-calculator-protobuf/gen/go/distributed-calculator"
+	errs "github.com/k6mil6/distributed-calculator/internal/errors"
 	"github.com/k6mil6/distributed-calculator/internal/model"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -29,6 +31,9 @@ func (s *serverApi) GetFreeExpressions(
 ) (*distributedcalculatorv1.GetFreeExpressionsResponse, error) {
 	freeExpression, err := s.orchestrator.GetFreeExpressions(ctx)
 	if err != nil {
+		if errors.Is(err, errs.ErrSubexpressionNotFound) {
+			return nil, status.Error(codes.NotFound, "error getting free expressions")
+		}
 		return nil, status.Error(codes.Internal, "error getting free expressions")
 	}
 

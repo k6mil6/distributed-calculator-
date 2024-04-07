@@ -38,7 +38,7 @@ func New(expressionGetter ExpressionGetter, subexpressionSaver SubexpressionSave
 	}
 }
 
-func (f *Fetcher) Start(context context.Context) {
+func (f *Fetcher) Start(ctx context.Context) {
 	ticker := time.NewTicker(f.fetchInterval)
 	defer ticker.Stop()
 
@@ -47,35 +47,35 @@ func (f *Fetcher) Start(context context.Context) {
 	for {
 		select {
 		case <-ticker.C:
-			f.Fetch(context)
-		case <-context.Done():
+			f.Fetch(ctx)
+		case <-ctx.Done():
 			return
 		}
 	}
 }
 
-func (f *Fetcher) Fetch(context context.Context) {
-	expressions, err := f.expressionGetter.NonTakenExpressions(context)
+func (f *Fetcher) Fetch(ctx context.Context) {
+	expressions, err := f.expressionGetter.NonTakenExpressions(ctx)
 	if err != nil {
 		f.logger.Error("failed to fetch expressions", err)
 		return
 	}
 
 	for _, expression := range expressions {
-		if err := f.expressionGetter.TakeExpression(context, expression.ID); err != nil {
+		if err := f.expressionGetter.TakeExpression(ctx, expression.ID); err != nil {
 			f.logger.Error("failed to take expression", err)
 			return
 		}
 		f.logger.Info("fetching expression", "expression_id", expression.ID)
 
-		subexpressions, err := f.divideIntoSubexpressions(context, expression)
+		subexpressions, err := f.divideIntoSubexpressions(ctx, expression)
 		if err != nil {
 			f.logger.Error("failed to divide expression into subexpressions", err)
 			return
 		}
 		for _, subexpression := range subexpressions {
 			f.logger.Info("saving subexpression", "subexpression_id", subexpression.ID, "expression", subexpression.Subexpression)
-			err := f.subexpressionSaver.Save(context, subexpression)
+			err := f.subexpressionSaver.Save(ctx, subexpression)
 			if err != nil {
 				f.logger.Error("failed to save subexpression", err)
 				return
@@ -85,7 +85,7 @@ func (f *Fetcher) Fetch(context context.Context) {
 	}
 }
 
-func (f *Fetcher) divideIntoSubexpressions(context context.Context, expression model.Expression) ([]model.Subexpression, error) {
+func (f *Fetcher) divideIntoSubexpressions(ctx context.Context, expression model.Expression) ([]model.Subexpression, error) {
 	infixTokens, err := shuntingYard.Scan(expression.Expression)
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (f *Fetcher) divideIntoSubexpressions(context context.Context, expression m
 		expr string
 		id   int
 	}
-	subExprID, err := f.subexpressionSaver.LastSubexpression(context)
+	subExprID, err := f.subexpressionSaver.LastSubexpression(ctx)
 
 	for _, token := range postfixTokens {
 		if token.Type == 1 {

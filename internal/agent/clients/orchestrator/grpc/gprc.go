@@ -6,10 +6,12 @@ import (
 	grpclog "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	grpcretry "github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/retry"
 	distributedcalculatorv1 "github.com/k6mil6/distributed-calculator-protobuf/gen/go/distributed-calculator"
+	errs "github.com/k6mil6/distributed-calculator/internal/errors"
 	"github.com/k6mil6/distributed-calculator/internal/model"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/status"
 	"log/slog"
 	"time"
 )
@@ -29,7 +31,7 @@ func New(
 	op := "grpc.New"
 
 	retryOpts := []grpcretry.CallOption{
-		grpcretry.WithCodes(codes.DeadlineExceeded),
+		grpcretry.WithCodes(codes.Internal),
 		grpcretry.WithMax(uint(retriesCount)),
 		grpcretry.WithPerRetryTimeout(timeout),
 	}
@@ -52,6 +54,7 @@ func New(
 
 	return &Client{
 		api: distributedcalculatorv1.NewOrchestratorClient(cc),
+		log: log,
 	}, nil
 }
 
@@ -64,6 +67,14 @@ func (c *Client) GetFreeExpressions(ctx context.Context) (model.Subexpression, e
 
 	resp, err := c.api.GetFreeExpressions(ctx, &distributedcalculatorv1.GetFreeExpressionsRequest{})
 	if err != nil {
+		st, ok := status.FromError(err)
+		if ok {
+			log.Info("gRPC error received", slog.String("code", st.Code().String()))
+
+			if st.Code() == codes.NotFound {
+				return model.Subexpression{}, errs.ErrSubexpressionNotFound
+			}
+		}
 		return model.Subexpression{}, fmt.Errorf("%s: %w", op, err)
 	}
 
@@ -97,14 +108,14 @@ func (c *Client) SaveResult(ctx context.Context, subexpressionID int, result flo
 	return int(resp.SubexpressionID), nil
 }
 
-func (c *Client) SendHeartbeat(ctx context.Context) error {
+func (c *Client) SendHeartbeat(ctx context.Context, workerID int) error {
 	op := "grpc.SendHeartbeat"
 
 	log := c.log.With(slog.String("op", op))
 
 	log.Info("sending heartbeat")
 
-	_, err := c.api.SendHeartbeat(ctx, &distributedcalculatorv1.SendHeartbeatRequest{})
+	_, err := c.api.SendHeartbeat(ctx, &distributedcalculatorv1.SendHeartbeatRequest{WorkerID: int32(workerID)})
 	if err != nil {
 		return fmt.Errorf("%s: %w", op, err)
 	}

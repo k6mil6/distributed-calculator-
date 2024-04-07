@@ -9,16 +9,19 @@ import (
 )
 
 type Config struct {
-	Env              string        `hcl:"env" env:"ENV" default:"local"`
-	DatabaseDSN      string        `hcl:"database_dsn" env:"DB_DSN" default:"postgres://postgres:postgres@localhost:5442/calc_db?sslmode=disable"`
-	GoroutineNumber  int           `hcl:"goroutine_number" env:"GOROUTINE_NUMBER" default:"5"`
-	OrchestratorURL  string        `hcl:"orchestrator_url" env:"ORCHESTRATOR_URL" default:"http://localhost:5441"`
-	WorkerTimeout    time.Duration `hcl:"worker_timeout" env:"WORKER_TIMEOUT" default:"1m"`
-	HeartbeatTimeout time.Duration `hcl:"heartbeat_timeout" env:"HEARTBEAT_TIMEOUT" default:"30s"`
-	FetcherInterval  time.Duration `hcl:"fetcher_interval" env:"FETCHER_INTERVAL" default:"10s"`
-	CheckerInterval  time.Duration `hcl:"checker_interval" env:"CHECKER_INTERVAL" default:"10s"`
-	MigrationPath    string        `hcl:"migration_path" env:"MIGRATION_PATH" default:"./internal/storage/migrations"`
-	GrpcPort         int           `hcl:"grpc_port" env:"GRPC_PORT" default:"50051"`
+	Env             string        `hcl:"env" env:"ENV" default:"local"`
+	DatabaseDSN     string        `hcl:"database_dsn" env:"DB_DSN" default:"postgres://postgres:postgres@localhost:5442/calc_db?sslmode=disable"`
+	FetcherInterval time.Duration `hcl:"fetcher_interval" env:"FETCHER_INTERVAL" default:"10s"`
+	CheckerInterval time.Duration `hcl:"checker_interval" env:"CHECKER_INTERVAL" default:"10s"`
+	MigrationPath   string        `hcl:"migration_path" env:"MIGRATION_PATH" default:"./internal/storage/migrations"`
+	GrpcPort        int           `hcl:"grpc_port" env:"GRPC_PORT" default:"50051"`
+
+	HeartbeatTimeout     time.Duration `hcl:"heartbeat_timeout" env:"HEARTBEAT_TIMEOUT" default:"30s"`
+	GoroutineNumber      int           `hcl:"goroutine_number" env:"GOROUTINE_NUMBER" default:"5"`
+	WorkerTimeout        time.Duration `hcl:"worker_timeout" env:"WORKER_TIMEOUT" default:"1m"`
+	GRPCServerAddress    string        `hcl:"grpc_server_address" env:"GRPC_SERVER_ADDRESS" default:"localhost:50051"`
+	GRPCReconnectTimeout time.Duration `hcl:"grpc_reconnect_timeout" env:"GRPC_RECONNECT_TIMEOUT" default:"5s"`
+	GRPCReconnectRetries int           `hcl:"grpc_reconnect_retries" env:"GRPC_RECONNECT_RETRIES" default:"5"`
 }
 
 var (

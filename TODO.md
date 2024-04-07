@@ -1,2 +1,9 @@
 
-- [ ] add possibility to send worker id in case it is already defined. it is needed to checked whether this id is sent and depending on it change the behavior
+TODO: 
+- worker should send id in case it is already defined
+- add userid to db
+- add jwt
+- add login
+- add register
+
+
