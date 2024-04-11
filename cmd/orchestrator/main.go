@@ -17,7 +17,7 @@ import (
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http_server/handlers/timeouts/set_timeouts"
 	mwlogger "github.com/k6mil6/distributed-calculator/internal/orchestrator/http_server/middleware/logger"
 	"github.com/k6mil6/distributed-calculator/internal/storage/postgres"
-	"github.com/k6mil6/distributed-calculator/pkg/logger"
+	"github.com/k6mil6/distributed-calculator/lib/logger"
 	_ "github.com/lib/pq"
 	"log/slog"
 	"net/http"
