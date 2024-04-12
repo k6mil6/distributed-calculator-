@@ -1,7 +1,7 @@
 package logger
 
 import (
-	"github.com/k6mil6/distributed-calculator/pkg/logger/handlers/slogpretty"
+	"github.com/k6mil6/distributed-calculator/lib/logger/handlers/slogpretty"
 	"log/slog"
 	"os"
 )
