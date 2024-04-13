@@ -5,5 +5,4 @@ TODO:
 - add jwt
 - add login
 - add register
-
-
+- refactor app, make http server app too

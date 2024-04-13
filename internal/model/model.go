@@ -34,3 +34,9 @@ type Timeouts struct {
 	ID       int             `json:"id,omitempty"`
 	Timeouts timeout.Timeout `json:"timeouts,omitempty"`
 }
+
+type User struct {
+	ID           int64  `json:"id"`
+	Login        string `json:"login"`
+	PasswordHash string `json:"password_hash"`
+}
