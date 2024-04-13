@@ -9,24 +9,24 @@ import (
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/k6mil6/distributed-calculator/internal/model"
-	"github.com/k6mil6/distributed-calculator/internal/storage"
+	errs "github.com/k6mil6/distributed-calculator/internal/storage/errors"
 	"github.com/k6mil6/distributed-calculator/internal/timeout"
 	"github.com/lib/pq"
 	"github.com/samber/lo"
 	"time"
 )
 
-type ExpressionStorage struct {
+type ExpressionsStorage struct {
 	db *sqlx.DB
 }
 
-func NewExpressionStorage(db *sqlx.DB) *ExpressionStorage {
-	return &ExpressionStorage{
+func NewExpressionStorage(db *sqlx.DB) *ExpressionsStorage {
+	return &ExpressionsStorage{
 		db: db,
 	}
 }
 
-func (s *ExpressionStorage) Save(context context.Context, expression model.Expression) error {
+func (s *ExpressionsStorage) Save(context context.Context, expression model.Expression) error {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return err
@@ -93,13 +93,13 @@ func handlePQError(err error) error {
 	var pgErr *pq.Error
 	if errors.As(err, &pgErr) {
 		if pgErr.Code == "23505" {
-			return storage.ErrExpressionInProgress
+			return errs.ErrExpressionInProgress
 		}
 	}
 	return err
 }
 
-func (s *ExpressionStorage) Get(context context.Context, id uuid.UUID) (model.Expression, error) {
+func (s *ExpressionsStorage) Get(context context.Context, id uuid.UUID) (model.Expression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return model.Expression{}, err
@@ -116,7 +116,7 @@ func (s *ExpressionStorage) Get(context context.Context, id uuid.UUID) (model.Ex
 
 	if err := conn.GetContext(context, &expression, query, id); err != nil {
 		if errors.As(err, &sql.ErrNoRows) {
-			return model.Expression{}, storage.ErrExpressionNotFound
+			return model.Expression{}, errs.ErrExpressionNotFound
 		}
 		return model.Expression{}, err
 	}
@@ -124,7 +124,7 @@ func (s *ExpressionStorage) Get(context context.Context, id uuid.UUID) (model.Ex
 	return model.Expression(expression), nil
 }
 
-func (s *ExpressionStorage) NonTakenExpressions(context context.Context) ([]model.Expression, error) {
+func (s *ExpressionsStorage) NonTakenExpressions(context context.Context) ([]model.Expression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return nil, err
@@ -149,7 +149,7 @@ func (s *ExpressionStorage) NonTakenExpressions(context context.Context) ([]mode
 	}), nil
 }
 
-func (s *ExpressionStorage) TakeExpression(context context.Context, id uuid.UUID) error {
+func (s *ExpressionsStorage) TakeExpression(context context.Context, id uuid.UUID) error {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return err
@@ -165,7 +165,7 @@ func (s *ExpressionStorage) TakeExpression(context context.Context, id uuid.UUID
 	return err
 }
 
-func (s *ExpressionStorage) AllExpressions(context context.Context) ([]model.Expression, error) {
+func (s *ExpressionsStorage) AllExpressions(context context.Context) ([]model.Expression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return nil, err
@@ -183,7 +183,7 @@ func (s *ExpressionStorage) AllExpressions(context context.Context) ([]model.Exp
 	}), nil
 }
 
-func (s *ExpressionStorage) UpdateResult(context context.Context, id uuid.UUID, result float64) error {
+func (s *ExpressionsStorage) UpdateResult(context context.Context, id uuid.UUID, result float64) error {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return err

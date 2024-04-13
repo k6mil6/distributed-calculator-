@@ -1,33 +1,30 @@
-package actual_timeouts
+package get
 
 import (
 	"context"
 	"github.com/go-chi/render"
 	"github.com/k6mil6/distributed-calculator/internal/model"
+	orchestratorhttp "github.com/k6mil6/distributed-calculator/internal/orchestrator/http"
 	resp "github.com/k6mil6/distributed-calculator/internal/orchestrator/response"
 	"log/slog"
 	"net/http"
 )
 
-type TimeoutsGetter interface {
-	GetActualTimeouts(context context.Context) (model.Timeouts, error)
-}
-
 type Response struct {
 	Timeouts model.Timeouts `json:"timeouts"`
 }
 
-func New(logger *slog.Logger, timeoutsGetter TimeoutsGetter, context context.Context) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, timeout orchestratorhttp.Timeout) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.timeouts.actual_timeouts.New"
 
-		logger = logger.With(
+		log = log.With(
 			slog.String("op", op),
 		)
 
-		timeouts, err := timeoutsGetter.GetActualTimeouts(context)
+		timeouts, err := timeout.GetActualTimeouts(ctx)
 		if err != nil {
-			logger.Error("error getting actual timeouts:", err)
+			log.Error("error getting actual timeouts:", err)
 
 			render.JSON(w, r, resp.Error("error getting actual timeouts"))
 

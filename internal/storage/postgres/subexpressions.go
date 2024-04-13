@@ -11,17 +11,17 @@ import (
 	"time"
 )
 
-type SubexpressionStorage struct {
+type SubexpressionsStorage struct {
 	db *sqlx.DB
 }
 
-func NewSubexpressionStorage(db *sqlx.DB) *SubexpressionStorage {
-	return &SubexpressionStorage{
+func NewSubexpressionStorage(db *sqlx.DB) *SubexpressionsStorage {
+	return &SubexpressionsStorage{
 		db: db,
 	}
 }
 
-func (s *SubexpressionStorage) Save(context context.Context, subExpression model.Subexpression) error {
+func (s *SubexpressionsStorage) Save(context context.Context, subExpression model.Subexpression) error {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func (s *SubexpressionStorage) Save(context context.Context, subExpression model
 	return nil
 }
 
-func (s *SubexpressionStorage) GetById(context context.Context, id int) (model.Subexpression, error) {
+func (s *SubexpressionsStorage) GetById(context context.Context, id int) (model.Subexpression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return model.Subexpression{}, err
@@ -60,7 +60,7 @@ func (s *SubexpressionStorage) GetById(context context.Context, id int) (model.S
 	return model.Subexpression(subexpression), nil
 }
 
-func (s *SubexpressionStorage) NonTakenSubexpressions(context context.Context) ([]model.Subexpression, error) {
+func (s *SubexpressionsStorage) NonTakenSubexpressions(context context.Context) ([]model.Subexpression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return nil, err
@@ -87,7 +87,7 @@ func (s *SubexpressionStorage) NonTakenSubexpressions(context context.Context) (
 	}), nil
 }
 
-func (s *SubexpressionStorage) TakeSubexpression(ctx context.Context, id int) (int, error) {
+func (s *SubexpressionsStorage) TakeSubexpression(ctx context.Context, id int) (int, error) {
 	tx, err := s.db.BeginTx(ctx, nil)
 	if err != nil {
 		return 0, err
@@ -119,7 +119,7 @@ func (s *SubexpressionStorage) TakeSubexpression(ctx context.Context, id int) (i
 	return workerId, nil
 }
 
-func (s *SubexpressionStorage) SubexpressionIsDone(context context.Context, id int, result float64) error {
+func (s *SubexpressionsStorage) SubexpressionIsDone(context context.Context, id int, result float64) error {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return err
@@ -138,7 +138,7 @@ func (s *SubexpressionStorage) SubexpressionIsDone(context context.Context, id i
 	return nil
 }
 
-func (s *SubexpressionStorage) LastSubexpression(context context.Context) (int, error) {
+func (s *SubexpressionsStorage) LastSubexpression(context context.Context) (int, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return 0, err
@@ -154,7 +154,7 @@ func (s *SubexpressionStorage) LastSubexpression(context context.Context) (int, 
 	return id, nil
 }
 
-func (s *SubexpressionStorage) DoneSubexpressions(context context.Context) ([]model.Subexpression, error) {
+func (s *SubexpressionsStorage) DoneSubexpressions(context context.Context) ([]model.Subexpression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return nil, err
@@ -183,7 +183,7 @@ func (s *SubexpressionStorage) DoneSubexpressions(context context.Context) ([]mo
 	}), nil
 }
 
-func (s *SubexpressionStorage) SubexpressionByDependableId(ctx context.Context, id int) ([]model.Subexpression, error) {
+func (s *SubexpressionsStorage) SubexpressionByDependableId(ctx context.Context, id int) ([]model.Subexpression, error) {
 	conn, err := s.db.Connx(ctx)
 	if err != nil {
 		return nil, err
@@ -223,7 +223,7 @@ func (s *SubexpressionStorage) SubexpressionByDependableId(ctx context.Context, 
 	return subexpressions, nil
 }
 
-func (s *SubexpressionStorage) Delete(context context.Context, id int) error {
+func (s *SubexpressionsStorage) Delete(context context.Context, id int) error {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return err
@@ -241,7 +241,7 @@ func (s *SubexpressionStorage) Delete(context context.Context, id int) error {
 	return nil
 }
 
-func (s *SubexpressionStorage) CompleteSubexpression(context context.Context, id uuid.UUID) (model.Subexpression, error) {
+func (s *SubexpressionsStorage) CompleteSubexpression(context context.Context, id uuid.UUID) (model.Subexpression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return model.Subexpression{}, err
@@ -257,7 +257,7 @@ func (s *SubexpressionStorage) CompleteSubexpression(context context.Context, id
 	return model.Subexpression(subexpression), nil
 }
 
-func (s *SubexpressionStorage) TakenAt(context context.Context) ([]model.Subexpression, error) {
+func (s *SubexpressionsStorage) TakenAt(context context.Context) ([]model.Subexpression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return nil, err
@@ -276,7 +276,7 @@ func (s *SubexpressionStorage) TakenAt(context context.Context) ([]model.Subexpr
 
 }
 
-func (s *SubexpressionStorage) MakeBeingChecked(context context.Context, id int) error {
+func (s *SubexpressionsStorage) MakeBeingChecked(context context.Context, id int) error {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return err
@@ -294,7 +294,7 @@ func (s *SubexpressionStorage) MakeBeingChecked(context context.Context, id int)
 	return nil
 }
 
-func (s *SubexpressionStorage) MakeNonTaken(context context.Context, id int) error {
+func (s *SubexpressionsStorage) MakeNonTaken(context context.Context, id int) error {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return err

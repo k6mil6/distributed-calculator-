@@ -3,6 +3,7 @@ package login
 import (
 	"context"
 	"github.com/go-chi/render"
+	orchestratorhttp "github.com/k6mil6/distributed-calculator/internal/orchestrator/http"
 	resp "github.com/k6mil6/distributed-calculator/internal/orchestrator/response"
 	"log/slog"
 	"net/http"
@@ -18,11 +19,7 @@ type Response struct {
 	JWTToken string `json:"jwt_token"`
 }
 
-type Auth interface {
-	Login(ctx context.Context, login, password string) (string, error)
-}
-
-func New(log *slog.Logger, ctx context.Context, auth Auth) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, auth orchestratorhttp.Auth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		op := "handlers.user.login.New"
 

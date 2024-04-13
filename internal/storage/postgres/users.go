@@ -6,7 +6,7 @@ import (
 	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/k6mil6/distributed-calculator/internal/model"
-	"github.com/k6mil6/distributed-calculator/internal/storage"
+	errs "github.com/k6mil6/distributed-calculator/internal/storage/errors"
 	"github.com/lib/pq"
 )
 
@@ -39,7 +39,7 @@ func (s *UsersStorage) Save(context context.Context, user model.User) (int, erro
 	).Scan(&id); err != nil {
 		var pqErr *pq.Error
 		if errors.As(err, &pqErr) && pqErr.Code == "23505" {
-			return 0, storage.ErrUserExists
+			return 0, errs.ErrUserExists
 		}
 		return 0, err
 	}
@@ -63,7 +63,7 @@ func (s *UsersStorage) GetByLogin(context context.Context, login string) (model.
 		login,
 	); err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return model.User{}, storage.ErrUserNotFound
+			return model.User{}, errs.ErrUserNotFound
 		}
 		return model.User{}, err
 	}

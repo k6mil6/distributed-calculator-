@@ -15,6 +15,7 @@ type Config struct {
 	CheckerInterval time.Duration `hcl:"checker_interval" env:"CHECKER_INTERVAL" default:"10s"`
 	MigrationPath   string        `hcl:"migration_path" env:"MIGRATION_PATH" default:"./internal/storage/migrations"`
 	GrpcPort        int           `hcl:"grpc_port" env:"GRPC_PORT" default:"50051"`
+	HttpPort        int           `hcl:"http_port" env:"HTTP_PORT" default:"8080"`
 
 	HeartbeatTimeout     time.Duration `hcl:"heartbeat_timeout" env:"HEARTBEAT_TIMEOUT" default:"30s"`
 	GoroutineNumber      int           `hcl:"goroutine_number" env:"GOROUTINE_NUMBER" default:"5"`
@@ -22,6 +23,9 @@ type Config struct {
 	GRPCServerAddress    string        `hcl:"grpc_server_address" env:"GRPC_SERVER_ADDRESS" default:"localhost:50051"`
 	GRPCReconnectTimeout time.Duration `hcl:"grpc_reconnect_timeout" env:"GRPC_RECONNECT_TIMEOUT" default:"5s"`
 	GRPCReconnectRetries int           `hcl:"grpc_reconnect_retries" env:"GRPC_RECONNECT_RETRIES" default:"5"`
+
+	TokenTTL time.Duration `hcl:"token_ttl" env:"TOKEN_TTL" default:"1h"`
+	Secret   string        `hcl:"secret" env:"SECRET" default:"secret"`
 }
 
 var (

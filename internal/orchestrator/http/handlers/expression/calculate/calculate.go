@@ -2,14 +2,12 @@ package calculate
 
 import (
 	"context"
-	"errors"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
 	"github.com/k6mil6/distributed-calculator/internal/model"
+	orchestratorhttp "github.com/k6mil6/distributed-calculator/internal/orchestrator/http"
 	resp "github.com/k6mil6/distributed-calculator/internal/orchestrator/response"
-	"github.com/k6mil6/distributed-calculator/internal/storage"
 	"github.com/k6mil6/distributed-calculator/internal/timeout"
-	"github.com/k6mil6/distributed-calculator/lib/validation"
 	"log/slog"
 	"net/http"
 )
@@ -25,61 +23,40 @@ type Response struct {
 	Id uuid.UUID `json:"id"`
 }
 
-type ExpressionSaver interface {
-	Save(context context.Context, expression model.Expression) error
-}
-
-func New(logger *slog.Logger, expressionSaver ExpressionSaver, context context.Context) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, expression orchestratorhttp.Expression) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.expression.calculate.New"
 
-		logger = logger.With(
+		log = log.With(
 			slog.String("op", op),
 		)
 
 		var req Request
 
 		if err := render.DecodeJSON(r.Body, &req); err != nil {
-			logger.Error("error decoding JSON request:", err)
+			log.Error("error decoding JSON request:", err)
 
 			render.JSON(w, r, resp.Error("error decoding JSON request"))
 
 			return
 		}
 
-		logger.Info("request body decoded", slog.Any("request", req))
+		log.Info("request body decoded", slog.Any("request", req))
 
-		if !validation.IsMathExpressionValid(req.Expression) {
-			logger.Error("invalid math expression")
-
-			render.JSON(w, r, resp.Error("invalid math expression"))
-
-			return
-		}
-
-		logger.Info("math expression is valid")
-
-		err := expressionSaver.Save(context, model.Expression{
+		id, err := expression.Save(ctx, model.Expression{
 			ID:         req.Id,
 			Expression: req.Expression,
 			Timeouts:   req.Timeouts,
 		})
-
 		if err != nil {
-			if errors.Is(err, storage.ErrExpressionInProgress) {
-				render.JSON(w, r, resp.InProgress())
-
-				return
-			}
-			logger.Error("error saving expression:", err)
+			log.Error("error saving expression:", err)
 
 			render.JSON(w, r, resp.Error("error saving expression"))
 
 			return
 		}
-		logger.Info("expression saved successfully: ", req.Id)
 
-		responseOK(w, r, req.Id)
+		responseOK(w, r, id)
 	}
 }
 

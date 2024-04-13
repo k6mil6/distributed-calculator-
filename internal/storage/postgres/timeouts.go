@@ -17,22 +17,26 @@ func NewTimeoutsStorage(db *sqlx.DB) *TimeoutsStorage {
 	}
 }
 
-func (s *TimeoutsStorage) Save(context context.Context, timeouts model.Timeouts) error {
+func (s *TimeoutsStorage) Save(context context.Context, timeouts model.Timeouts) (int, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	defer conn.Close()
 
-	if _, err := conn.ExecContext(
+	query := `INSERT INTO timeouts (timeouts_values) VALUES ($1) RETURNING id`
+
+	var id int
+
+	if err := conn.QueryRowContext(
 		context,
-		`INSERT INTO timeouts (timeouts_values) VALUES ($1)`,
+		query,
 		timeouts.Timeouts,
-	); err != nil {
-		return err
+	).Scan(&id); err != nil {
+		return 0, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (s *TimeoutsStorage) GetActualTimeouts(context context.Context) (model.Timeouts, error) {

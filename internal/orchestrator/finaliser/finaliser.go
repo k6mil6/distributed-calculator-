@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/google/uuid"
 	"github.com/k6mil6/distributed-calculator/internal/model"
-	sb "github.com/k6mil6/distributed-calculator/pkg/subexpressions/remaker"
+	sb "github.com/k6mil6/distributed-calculator/lib/subexpressions/remaker"
 	"log/slog"
 )
 

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/k6mil6/distributed-calculator/internal/model"
-	"github.com/k6mil6/distributed-calculator/internal/storage"
+	errs "github.com/k6mil6/distributed-calculator/internal/storage/errors"
 	"github.com/k6mil6/distributed-calculator/lib/jwt"
 	"golang.org/x/crypto/bcrypt"
 	"log/slog"
@@ -60,7 +60,7 @@ func (a *Auth) Login(ctx context.Context, login string, password string) (string
 
 	user, err := a.userProvider.GetByLogin(ctx, login)
 	if err != nil {
-		if errors.Is(err, storage.ErrUserNotFound) {
+		if errors.Is(err, errs.ErrUserNotFound) {
 			log.Warn("user not found", login)
 
 			return "", fmt.Errorf("%s: %w", op, ErrInvalidCredentials)

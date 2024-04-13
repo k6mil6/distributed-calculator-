@@ -1,9 +1,10 @@
-package set_timeouts
+package set
 
 import (
 	"context"
 	"github.com/go-chi/render"
 	"github.com/k6mil6/distributed-calculator/internal/model"
+	orchestratorhttp "github.com/k6mil6/distributed-calculator/internal/orchestrator/http"
 	resp "github.com/k6mil6/distributed-calculator/internal/orchestrator/response"
 	"github.com/k6mil6/distributed-calculator/internal/timeout"
 	"log/slog"
@@ -14,32 +15,28 @@ type Request struct {
 	Timeouts timeout.Timeout `json:"timeouts"`
 }
 
-type TimeoutsSetter interface {
-	Save(context context.Context, timeouts model.Timeouts) error
-}
-
-func New(logger *slog.Logger, timeoutsSetter TimeoutsSetter, context context.Context) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, timeout orchestratorhttp.Timeout) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.timeouts.set_timeouts.New"
 
-		logger = logger.With(
+		log = log.With(
 			slog.String("op", op),
 		)
 
 		var req Request
 
 		if err := render.DecodeJSON(r.Body, &req); err != nil {
-			logger.Error("error decoding JSON request:", err)
+			log.Error("error decoding JSON request:", err)
 
 			render.JSON(w, r, resp.Error("error decoding JSON request"))
 
 			return
 		}
 
-		if err := timeoutsSetter.Save(context, model.Timeouts{
+		if _, err := timeout.Save(ctx, model.Timeouts{
 			Timeouts: req.Timeouts,
 		}); err != nil {
-			logger.Error("error setting timeouts:", err)
+			log.Error("error setting timeouts:", err)
 
 			render.JSON(w, r, resp.Error("error setting timeouts"))
 

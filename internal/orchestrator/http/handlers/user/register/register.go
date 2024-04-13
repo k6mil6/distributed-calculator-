@@ -3,6 +3,7 @@ package register
 import (
 	"context"
 	"github.com/go-chi/render"
+	orchestratorhttp "github.com/k6mil6/distributed-calculator/internal/orchestrator/http"
 	resp "github.com/k6mil6/distributed-calculator/internal/orchestrator/response"
 	"log/slog"
 	"net/http"
@@ -17,11 +18,7 @@ type Response struct {
 	resp.Response
 }
 
-type Auth interface {
-	Register(ctx context.Context, login, password string) (int, error)
-}
-
-func New(log *slog.Logger, ctx context.Context, auth Auth) http.HandlerFunc {
+func New(ctx context.Context, log *slog.Logger, auth orchestratorhttp.Auth) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const op = "handlers.user.register.New"
 

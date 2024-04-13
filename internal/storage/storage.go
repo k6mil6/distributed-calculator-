@@ -1,13 +1,22 @@
 package storage
 
-import "errors"
-
-var (
-	ErrExpressionNotFound   = errors.New("expression not found")
-	ErrExpressionInProgress = errors.New("expression in progress")
+import (
+	"github.com/jmoiron/sqlx"
+	"github.com/k6mil6/distributed-calculator/internal/storage/postgres"
 )
 
-var (
-	ErrUserExists   = errors.New("user already exists")
-	ErrUserNotFound = errors.New("user not found")
-)
+type Storages struct {
+	ExpressionsStorage    *postgres.ExpressionsStorage
+	SubexpressionsStorage *postgres.SubexpressionsStorage
+	TimeoutsStorage       *postgres.TimeoutsStorage
+	UsersStorage          *postgres.UsersStorage
+}
+
+func New(db *sqlx.DB) Storages {
+	return Storages{
+		ExpressionsStorage:    postgres.NewExpressionStorage(db),
+		SubexpressionsStorage: postgres.NewSubexpressionStorage(db),
+		TimeoutsStorage:       postgres.NewTimeoutsStorage(db),
+		UsersStorage:          postgres.NewUsersStorage(db),
+	}
+}
