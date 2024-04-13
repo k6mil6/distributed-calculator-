@@ -9,7 +9,7 @@ import (
 	resp "github.com/k6mil6/distributed-calculator/internal/orchestrator/response"
 	"github.com/k6mil6/distributed-calculator/internal/storage"
 	"github.com/k6mil6/distributed-calculator/internal/timeout"
-	"github.com/k6mil6/distributed-calculator/pkg/validation"
+	"github.com/k6mil6/distributed-calculator/lib/validation"
 	"log/slog"
 	"net/http"
 )

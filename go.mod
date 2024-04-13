@@ -32,6 +32,7 @@ require (
 	github.com/mgenware/go-shunting-yard v0.0.0-20170306102834-6dc682c5e09c // indirect
 	github.com/teepark/pqinterval v1.0.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
+	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/exp v0.0.0-20230522175609-2e198f4a06a1 // indirect
 	golang.org/x/net v0.24.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
