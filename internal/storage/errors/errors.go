@@ -8,6 +8,10 @@ var (
 )
 
 var (
+	ErrTimeoutNotFound = errors.New("timeout not found")
+)
+
+var (
 	ErrUserExists   = errors.New("user already exists")
 	ErrUserNotFound = errors.New("user not found")
 )

@@ -5,6 +5,7 @@ import (
 	"github.com/go-chi/render"
 	"github.com/k6mil6/distributed-calculator/internal/model"
 	orchestratorhttp "github.com/k6mil6/distributed-calculator/internal/orchestrator/http"
+	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http/middleware/user/identity"
 	resp "github.com/k6mil6/distributed-calculator/internal/orchestrator/response"
 	"github.com/k6mil6/distributed-calculator/internal/timeout"
 	"log/slog"
@@ -12,6 +13,7 @@ import (
 )
 
 type Request struct {
+	JWTToken string          `json:"jwt_token"`
 	Timeouts timeout.Timeout `json:"timeouts"`
 }
 
@@ -33,7 +35,18 @@ func New(ctx context.Context, log *slog.Logger, timeout orchestratorhttp.Timeout
 			return
 		}
 
+		if req.Timeouts == nil {
+			log.Error("timeouts are empty")
+
+			render.JSON(w, r, resp.Error("timeouts are empty"))
+
+			return
+		}
+
+		userID := identity.GetUserID(r.Context())
+
 		if _, err := timeout.Save(ctx, model.Timeouts{
+			UserID:   userID,
 			Timeouts: req.Timeouts,
 		}); err != nil {
 			log.Error("error setting timeouts:", err)

@@ -5,7 +5,7 @@ import (
 	"github.com/k6mil6/distributed-calculator/internal/agent/clients/orchestrator/grpc"
 	"github.com/k6mil6/distributed-calculator/internal/agent/worker"
 	"github.com/k6mil6/distributed-calculator/internal/config"
-	"github.com/k6mil6/distributed-calculator/pkg/logger"
+	"github.com/k6mil6/distributed-calculator/lib/logger"
 	"log/slog"
 	"sync"
 	"time"

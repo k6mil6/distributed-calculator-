@@ -8,6 +8,7 @@ import (
 
 type Expression struct {
 	ID         uuid.UUID       `json:"id"`
+	UserID     int64           `json:"user_id"`
 	Expression string          `json:"expression"`
 	CreatedAt  time.Time       `json:"created_at"`
 	Timeouts   timeout.Timeout `json:"timeouts"`
@@ -32,6 +33,7 @@ type Subexpression struct {
 
 type Timeouts struct {
 	ID       int             `json:"id,omitempty"`
+	UserID   int64           `json:"user_id,omitempty"`
 	Timeouts timeout.Timeout `json:"timeouts,omitempty"`
 }
 

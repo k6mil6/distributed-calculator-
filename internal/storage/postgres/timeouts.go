@@ -24,13 +24,14 @@ func (s *TimeoutsStorage) Save(context context.Context, timeouts model.Timeouts)
 	}
 	defer conn.Close()
 
-	query := `INSERT INTO timeouts (timeouts_values) VALUES ($1) RETURNING id`
+	query := `INSERT INTO timeouts (user_id, timeouts_values) VALUES ($1, $2) RETURNING id`
 
 	var id int
 
 	if err := conn.QueryRowContext(
 		context,
 		query,
+		timeouts.UserID,
 		timeouts.Timeouts,
 	).Scan(&id); err != nil {
 		return 0, err
@@ -39,7 +40,7 @@ func (s *TimeoutsStorage) Save(context context.Context, timeouts model.Timeouts)
 	return id, nil
 }
 
-func (s *TimeoutsStorage) GetActualTimeouts(context context.Context) (model.Timeouts, error) {
+func (s *TimeoutsStorage) GetActualTimeouts(context context.Context, userID int64) (model.Timeouts, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
 		return model.Timeouts{}, err
@@ -51,7 +52,8 @@ func (s *TimeoutsStorage) GetActualTimeouts(context context.Context) (model.Time
 	if err := conn.GetContext(
 		context,
 		&timeouts,
-		`SELECT timeouts_values FROM timeouts ORDER BY id DESC LIMIT 1`,
+		`SELECT timeouts_values FROM timeouts WHERE user_id = $1 ORDER BY id DESC LIMIT 1`,
+		userID,
 	); err != nil {
 		return model.Timeouts{}, err
 	}
@@ -60,5 +62,6 @@ func (s *TimeoutsStorage) GetActualTimeouts(context context.Context) (model.Time
 
 type dbTimeouts struct {
 	ID       int             `db:"id"`
+	UserID   int64           `db:"user_id"`
 	Timeouts timeout.Timeout `db:"timeouts_values"`
 }

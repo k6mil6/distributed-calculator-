@@ -34,7 +34,7 @@ func New(
 	expression := expressionService.New(log, storages.ExpressionsStorage, storages.ExpressionsStorage)
 	timeout := timeoutService.New(log, storages.TimeoutsStorage, storages.TimeoutsStorage)
 
-	httpApp := httpapp.New(ctx, log, port, auth, expression, timeout)
+	httpApp := httpapp.New(ctx, log, port, auth, expression, timeout, secret)
 
 	grpcApp := grpcapp.New(log, grpcPort, orchestrator)
 

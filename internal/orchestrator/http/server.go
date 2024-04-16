@@ -13,11 +13,11 @@ type Auth interface {
 
 type Expression interface {
 	Save(ctx context.Context, expression model.Expression) (uuid.UUID, error)
-	AllExpressions(ctx context.Context) ([]model.Expression, error)
-	Get(ctx context.Context, id uuid.UUID) (model.Expression, error)
+	Get(ctx context.Context, id uuid.UUID, userID int64) (model.Expression, error)
+	AllExpressions(ctx context.Context, userID int64) ([]model.Expression, error)
 }
 
 type Timeout interface {
-	GetActualTimeouts(context context.Context) (model.Timeouts, error)
-	Save(context context.Context, timeouts model.Timeouts) (int, error)
+	Save(ctx context.Context, timeouts model.Timeouts) (int, error)
+	GetActualTimeouts(ctx context.Context, userID int64) (model.Timeouts, error)
 }

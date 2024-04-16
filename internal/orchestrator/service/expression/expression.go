@@ -12,8 +12,10 @@ import (
 )
 
 var (
-	ErrExpressionNotValid   = errors.New("expression not valid")
-	ErrExpressionInProgress = errors.New("expression in progress")
+	ErrExpressionNotValid         = errors.New("expression not valid")
+	ErrExpressionInProgress       = errors.New("expression in progress")
+	ErrExpressionNotBelongsToUser = errors.New("expression not belongs to user")
+	ErrTimeoutNotFound            = errors.New("timeout not found")
 )
 
 type Expression struct {
@@ -28,7 +30,7 @@ type Saver interface {
 
 type Provider interface {
 	Get(context context.Context, id uuid.UUID) (model.Expression, error)
-	AllExpressions(context context.Context) ([]model.Expression, error)
+	AllExpressionsByUser(context context.Context, userID int64) ([]model.Expression, error)
 }
 
 func New(log *slog.Logger, saver Saver, provider Provider) *Expression {
@@ -46,21 +48,23 @@ func (e *Expression) Save(ctx context.Context, expression model.Expression) (uui
 		slog.String("op", op),
 	)
 
+	log.Info("validating math expression")
+
 	if !validation.IsMathExpressionValid(expression.Expression) {
 		return uuid.UUID{}, ErrExpressionNotValid
 	}
 
 	log.Info("math expression is valid")
 
-	err := e.saver.Save(ctx, model.Expression{
-		ID:         expression.ID,
-		Expression: expression.Expression,
-		Timeouts:   expression.Timeouts,
-	})
+	err := e.saver.Save(ctx, expression)
 
 	if err != nil {
 		if errors.Is(err, errs.ErrExpressionInProgress) {
 			return uuid.UUID{}, ErrExpressionInProgress
+		}
+
+		if errors.Is(err, errs.ErrTimeoutNotFound) {
+			return uuid.UUID{}, ErrTimeoutNotFound
 		}
 		log.Error("error saving expression:", err)
 
@@ -71,7 +75,7 @@ func (e *Expression) Save(ctx context.Context, expression model.Expression) (uui
 	return expression.ID, nil
 }
 
-func (e *Expression) Get(ctx context.Context, id uuid.UUID) (model.Expression, error) {
+func (e *Expression) Get(ctx context.Context, id uuid.UUID, userID int64) (model.Expression, error) {
 	const op = "Expression.Get"
 	log := e.log.With(
 		slog.String("op", op),
@@ -85,12 +89,17 @@ func (e *Expression) Get(ctx context.Context, id uuid.UUID) (model.Expression, e
 		return model.Expression{}, fmt.Errorf("%s: %w", op, err)
 	}
 
+	if expression.UserID != userID {
+		log.Error("expression does not belong to user")
+		return model.Expression{}, fmt.Errorf("%s: %w", op, ErrExpressionNotBelongsToUser)
+	}
+
 	log.Info("expression found")
 
 	return expression, nil
 }
 
-func (e *Expression) AllExpressions(ctx context.Context) ([]model.Expression, error) {
+func (e *Expression) AllExpressions(ctx context.Context, userID int64) ([]model.Expression, error) {
 	const op = "Expression.AllExpressions"
 	log := e.log.With(
 		slog.String("op", op),
@@ -98,7 +107,7 @@ func (e *Expression) AllExpressions(ctx context.Context) ([]model.Expression, er
 
 	log.Info("attempting to get all expressions")
 
-	expressions, err := e.provider.AllExpressions(ctx)
+	expressions, err := e.provider.AllExpressionsByUser(ctx, userID)
 	if err != nil {
 		log.Error("error getting all expressions:", err)
 		return nil, fmt.Errorf("%s: %w", op, err)

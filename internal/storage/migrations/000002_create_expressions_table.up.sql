@@ -1,5 +1,6 @@
 CREATE TABLE IF NOT EXISTS expressions (
     id UUID PRIMARY KEY,
+    user_id INT NOT NULL,
     expression TEXT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT NOW(),
     timeouts_id INT,

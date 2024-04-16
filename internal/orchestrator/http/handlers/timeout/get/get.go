@@ -3,16 +3,12 @@ package get
 import (
 	"context"
 	"github.com/go-chi/render"
-	"github.com/k6mil6/distributed-calculator/internal/model"
 	orchestratorhttp "github.com/k6mil6/distributed-calculator/internal/orchestrator/http"
+	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http/middleware/user/identity"
 	resp "github.com/k6mil6/distributed-calculator/internal/orchestrator/response"
 	"log/slog"
 	"net/http"
 )
-
-type Response struct {
-	Timeouts model.Timeouts `json:"timeouts"`
-}
 
 func New(ctx context.Context, log *slog.Logger, timeout orchestratorhttp.Timeout) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -22,7 +18,9 @@ func New(ctx context.Context, log *slog.Logger, timeout orchestratorhttp.Timeout
 			slog.String("op", op),
 		)
 
-		timeouts, err := timeout.GetActualTimeouts(ctx)
+		userID := identity.GetUserID(r.Context())
+
+		timeouts, err := timeout.GetActualTimeouts(ctx, userID)
 		if err != nil {
 			log.Error("error getting actual timeouts:", err)
 
@@ -31,8 +29,6 @@ func New(ctx context.Context, log *slog.Logger, timeout orchestratorhttp.Timeout
 			return
 		}
 
-		render.JSON(w, r, Response{
-			Timeouts: timeouts,
-		})
+		render.JSON(w, r, timeouts)
 	}
 }

@@ -14,6 +14,7 @@ import (
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http/handlers/user/login"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http/handlers/user/register"
 	mwlogger "github.com/k6mil6/distributed-calculator/internal/orchestrator/http/middleware/logger"
+	"github.com/k6mil6/distributed-calculator/internal/orchestrator/http/middleware/user/identity"
 	"log/slog"
 	"net/http"
 )
@@ -24,21 +25,27 @@ type App struct {
 	server *http.Server
 }
 
-func New(ctx context.Context, log *slog.Logger, port int, auth authHttp.Auth, expression authHttp.Expression, timeout authHttp.Timeout) *App {
+func New(ctx context.Context, log *slog.Logger, port int, auth authHttp.Auth, expression authHttp.Expression, timeout authHttp.Timeout, secret string) *App {
 	router := chi.NewRouter()
 
 	router.Use(mwlogger.New(log))
 	router.Use(middleware.Recoverer)
 	router.Use(middleware.URLFormat)
 
-	router.Post("/calculate", calculate.New(ctx, log, expression))
-	router.Post("/set_timeouts", set.New(ctx, log, timeout))
 	router.Post("/register", register.New(ctx, log, auth))
 	router.Post("/login", login.New(ctx, log, auth))
 
-	router.Get("/all_expressions", all.New(ctx, log, expression))
-	router.Get("/expression/{id}", expressionGet.New(ctx, log, expression))
-	router.Get("/actual_timeouts", timeoutGet.New(ctx, log, timeout))
+	routerWithAuth := chi.NewRouter()
+	routerWithAuth.Use(identity.New(secret))
+
+	routerWithAuth.Post("/calculate", calculate.New(ctx, log, expression))
+	routerWithAuth.Post("/set_timeouts", set.New(ctx, log, timeout))
+
+	routerWithAuth.Get("/all_expressions", all.New(ctx, log, expression))
+	routerWithAuth.Get("/expression/{id}", expressionGet.New(ctx, log, expression))
+	routerWithAuth.Get("/actual_timeouts", timeoutGet.New(ctx, log, timeout))
+
+	router.Mount("/", routerWithAuth)
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),

@@ -31,7 +31,12 @@ func (s *ExpressionsStorage) Save(context context.Context, expression model.Expr
 	if err != nil {
 		return err
 	}
-	defer conn.Close()
+	defer func(conn *sqlx.Conn) {
+		err := conn.Close()
+		if err != nil {
+			panic(err)
+		}
+	}(conn)
 
 	var timeoutsID int
 
@@ -43,12 +48,13 @@ func (s *ExpressionsStorage) Save(context context.Context, expression model.Expr
 	if expression.Timeouts == nil {
 		err = tx.QueryRowContext(
 			context,
-			`SELECT id FROM timeouts ORDER BY id DESC LIMIT 1`,
+			`SELECT id FROM timeouts WHERE user_id = $1 ORDER BY id DESC LIMIT 1`,
+			expression.UserID,
 		).Scan(&timeoutsID)
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
 				tx.Rollback()
-				return errors.New("no timeouts found")
+				return errs.ErrTimeoutNotFound
 			}
 			tx.Rollback()
 			return err
@@ -62,8 +68,9 @@ func (s *ExpressionsStorage) Save(context context.Context, expression model.Expr
 
 		err = tx.QueryRowContext(
 			context,
-			`INSERT INTO timeouts (timeouts_values) VALUES ($1) RETURNING id`,
+			`INSERT INTO timeouts (timeouts_values, user_id) VALUES ($1, $2) RETURNING id`,
 			timeouts,
+			expression.UserID,
 		).Scan(&timeoutsID)
 		if err != nil {
 			tx.Rollback()
@@ -73,8 +80,9 @@ func (s *ExpressionsStorage) Save(context context.Context, expression model.Expr
 
 	if _, err := tx.ExecContext(
 		context,
-		`INSERT INTO expressions (id, expression, timeouts_id) VALUES ($1, $2, $3)`,
+		`INSERT INTO expressions (id, user_id, expression, timeouts_id) VALUES ($1, $2, $3, $4)`,
 		expression.ID,
+		expression.UserID,
 		expression.Expression,
 		timeoutsID,
 	); err != nil {
@@ -108,7 +116,7 @@ func (s *ExpressionsStorage) Get(context context.Context, id uuid.UUID) (model.E
 
 	var expression dbExpression
 
-	query := `SELECT e.id, e.expression, e.created_at, e.is_taken, t.timeouts_values, e.is_done, e.result
+	query := `SELECT e.id, e.user_id, e.expression, e.created_at, e.is_taken, t.timeouts_values, e.is_done, e.result
               FROM expressions AS e
               LEFT JOIN timeouts AS t ON e.timeouts_id = t.id
               WHERE e.id = $1
@@ -165,6 +173,24 @@ func (s *ExpressionsStorage) TakeExpression(context context.Context, id uuid.UUI
 	return err
 }
 
+func (s *ExpressionsStorage) AllExpressionsByUser(context context.Context, userID int64) ([]model.Expression, error) {
+	conn, err := s.db.Connx(context)
+	if err != nil {
+		return nil, err
+	}
+	defer conn.Close()
+
+	var expressions []dbExpression
+
+	if err := conn.SelectContext(context, &expressions, `SELECT id, expression, created_at, is_taken, result, is_done FROM expressions WHERE user_id = $1 ORDER BY created_at`, userID); err != nil {
+		return nil, err
+	}
+
+	return lo.Map(expressions, func(expression dbExpression, _ int) model.Expression {
+		return model.Expression(expression)
+	}), nil
+}
+
 func (s *ExpressionsStorage) AllExpressions(context context.Context) ([]model.Expression, error) {
 	conn, err := s.db.Connx(context)
 	if err != nil {
@@ -202,6 +228,7 @@ func (s *ExpressionsStorage) UpdateResult(context context.Context, id uuid.UUID,
 
 type dbExpression struct {
 	ID         uuid.UUID       `db:"id"`
+	UserID     int64           `db:"user_id"`
 	Expression string          `db:"expression"`
 	CreatedAt  time.Time       `db:"created_at"`
 	Timeouts   timeout.Timeout `db:"timeouts_values"`

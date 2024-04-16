@@ -11,6 +11,7 @@ type Timeout struct {
 	log      *slog.Logger
 	saver    Saver
 	provider Provider
+	secret   string
 }
 
 type Saver interface {
@@ -18,7 +19,7 @@ type Saver interface {
 }
 
 type Provider interface {
-	GetActualTimeouts(context context.Context) (model.Timeouts, error)
+	GetActualTimeouts(context context.Context, userID int64) (model.Timeouts, error)
 }
 
 func New(
@@ -51,7 +52,7 @@ func (t *Timeout) Save(ctx context.Context, timeouts model.Timeouts) (int, error
 	return id, nil
 }
 
-func (t *Timeout) GetActualTimeouts(ctx context.Context) (model.Timeouts, error) {
+func (t *Timeout) GetActualTimeouts(ctx context.Context, userID int64) (model.Timeouts, error) {
 	const op = "Timeout.GetActualTimeouts"
 
 	log := t.log.With(
@@ -60,7 +61,7 @@ func (t *Timeout) GetActualTimeouts(ctx context.Context) (model.Timeouts, error)
 
 	log.Info("getting actual timeouts")
 
-	timeouts, err := t.provider.GetActualTimeouts(ctx)
+	timeouts, err := t.provider.GetActualTimeouts(ctx, userID)
 	if err != nil {
 		log.Error("failed to get actual timeouts", err)
 		return model.Timeouts{}, fmt.Errorf("%s: %w", op, err)
