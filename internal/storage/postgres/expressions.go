@@ -226,6 +226,10 @@ func (s *ExpressionsStorage) UpdateResult(context context.Context, id uuid.UUID,
 	return err
 }
 
+func (s *ExpressionsStorage) Close() error {
+	return s.db.Close()
+}
+
 type dbExpression struct {
 	ID         uuid.UUID       `db:"id"`
 	UserID     int64           `db:"user_id"`

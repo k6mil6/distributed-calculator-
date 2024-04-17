@@ -71,6 +71,10 @@ func (s *UsersStorage) GetByLogin(context context.Context, login string) (model.
 	return model.User(user), nil
 }
 
+func (s *UsersStorage) Close() error {
+	return s.db.Close()
+}
+
 type dbUser struct {
 	ID           int64  `db:"id"`
 	Login        string `db:"login"`

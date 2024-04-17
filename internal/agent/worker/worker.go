@@ -9,7 +9,7 @@ import (
 )
 
 type Communicator interface {
-	GetFreeExpressions(ctx context.Context) (model.Subexpression, error)
+	GetFreeExpressions(ctx context.Context, workerID int) (model.Subexpression, error)
 	SaveResult(ctx context.Context, subexpressionID int, result float64) (int, error)
 	SendHeartbeat(ctx context.Context, workerID int) error
 }
@@ -29,12 +29,14 @@ func New(log *slog.Logger, timeout time.Duration) *Worker {
 
 func (w *Worker) Start(communicator Communicator, ctx context.Context) {
 	for {
-		resp, err := communicator.GetFreeExpressions(ctx)
+		resp, err := communicator.GetFreeExpressions(ctx, w.id)
 		if err != nil {
 			w.log.Error("error getting free expressions", err)
 			time.Sleep(w.timeout)
 			continue
 		}
+
+		w.id = resp.WorkerId
 
 		w.log.Info("got free expression", slog.Int("id", resp.ID))
 

@@ -42,3 +42,8 @@ type User struct {
 	Login        string `json:"login"`
 	PasswordHash []byte `json:"password_hash"`
 }
+
+type Heartbeat struct {
+	WorkerID int       `json:"worker_id"`
+	SentAt   time.Time `json:"sent_at"`
+}

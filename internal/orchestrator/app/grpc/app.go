@@ -19,7 +19,7 @@ type App struct {
 	port int
 }
 
-func New(log *slog.Logger, port int, orchestrator orchestratorgrpc.Orchestrator) *App {
+func New(log *slog.Logger, port int, orchestrator orchestratorgrpc.Orchestrator, heartbeat orchestratorgrpc.Heartbeat) *App {
 	loggingOpts := []logging.Option{
 		logging.WithLogOnEvents(
 			logging.PayloadReceived, logging.PayloadSent,
@@ -39,7 +39,7 @@ func New(log *slog.Logger, port int, orchestrator orchestratorgrpc.Orchestrator)
 		logging.UnaryServerInterceptor(InterceptorLogger(log), loggingOpts...),
 	))
 
-	orchestratorgrpc.Register(gRPCServer, orchestrator)
+	orchestratorgrpc.Register(gRPCServer, orchestrator, heartbeat)
 
 	return &App{
 		log:  log,

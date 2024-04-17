@@ -1,7 +1,18 @@
 version: '3'
 
 services:
-  db:
+  redis:
+    image: "redis:alpine"
+    command: redis-server --requirepass redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - $PWD/redis-data:/var/lib/redis
+        - $PWD/redis.conf:/usr/local/etc/redis/redis.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+  postgres:
     image: postgres:15
     restart: always
     environment:
@@ -12,7 +23,7 @@ services:
     ports:
       - "5442:5432"
     volumes:
-      - db:/var/lib/postgresql/data/
+      - postgres:/var/lib/postgresql/data/
 
 volumes:
-  db:
+  postgres:

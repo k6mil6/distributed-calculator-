@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"github.com/jmoiron/sqlx"
 	"github.com/k6mil6/distributed-calculator/internal/config"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/app"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/checker"
@@ -22,17 +21,21 @@ func main() {
 	log := logger.SetupLogger(cfg.Env).With(slog.String("env", cfg.Env))
 	log.Debug("logger debug mode enabled")
 
-	db, err := sqlx.Connect("postgres", cfg.DatabaseDSN)
-	if err != nil {
-		log.Error("failed to connect to database", err)
-		return
-	}
-	defer db.Close()
-
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer cancel()
 
-	storages := storage.New(db)
+	storages, err := storage.New(cfg.PostgresDatabaseDSN, cfg.RedisDatabaseDSN)
+	if err != nil {
+		log.Error("failed to connect to database", err)
+
+		return
+	}
+
+	defer func() {
+		if err := storages.CloseAll(); err != nil {
+			log.Error("failed to close storages", err)
+		}
+	}()
 
 	f := fetcher.New(storages.ExpressionsStorage, storages.SubexpressionsStorage, cfg.FetcherInterval, log)
 	c := checker.New(storages.SubexpressionsStorage, cfg.CheckerInterval, log)

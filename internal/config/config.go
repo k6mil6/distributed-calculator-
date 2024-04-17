@@ -9,13 +9,14 @@ import (
 )
 
 type Config struct {
-	Env             string        `hcl:"env" env:"ENV" default:"local"`
-	DatabaseDSN     string        `hcl:"database_dsn" env:"DB_DSN" default:"postgres://postgres:postgres@localhost:5442/calc_db?sslmode=disable"`
-	FetcherInterval time.Duration `hcl:"fetcher_interval" env:"FETCHER_INTERVAL" default:"10s"`
-	CheckerInterval time.Duration `hcl:"checker_interval" env:"CHECKER_INTERVAL" default:"10s"`
-	MigrationPath   string        `hcl:"migration_path" env:"MIGRATION_PATH" default:"./internal/storage/migrations"`
-	GrpcPort        int           `hcl:"grpc_port" env:"GRPC_PORT" default:"50051"`
-	HttpPort        int           `hcl:"http_port" env:"HTTP_PORT" default:"8080"`
+	Env                 string        `hcl:"env" env:"ENV" default:"local"`
+	PostgresDatabaseDSN string        `hcl:"database_dsn" env:"DB_DSN" default:"postgres://postgres:postgres@localhost:5442/calc_db?sslmode=disable"`
+	RedisDatabaseDSN    string        `hcl:"redis_dsn" env:"REDIS_DSN" default:"redis://default:redis@localhost:6379/0"`
+	FetcherInterval     time.Duration `hcl:"fetcher_interval" env:"FETCHER_INTERVAL" default:"10s"`
+	CheckerInterval     time.Duration `hcl:"checker_interval" env:"CHECKER_INTERVAL" default:"10s"`
+	MigrationPath       string        `hcl:"migration_path" env:"MIGRATION_PATH" default:"./internal/storage/migrations"`
+	GrpcPort            int           `hcl:"grpc_port" env:"GRPC_PORT" default:"50051"`
+	HttpPort            int           `hcl:"http_port" env:"HTTP_PORT" default:"8080"`
 
 	HeartbeatTimeout     time.Duration `hcl:"heartbeat_timeout" env:"HEARTBEAT_TIMEOUT" default:"30s"`
 	GoroutineNumber      int           `hcl:"goroutine_number" env:"GOROUTINE_NUMBER" default:"5"`

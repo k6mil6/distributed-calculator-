@@ -14,7 +14,7 @@ func main() {
 
 	m, err := migrate.New(
 		"file://"+cfg.MigrationPath,
-		cfg.DatabaseDSN,
+		cfg.PostgresDatabaseDSN,
 	)
 	if err != nil {
 		panic(err)

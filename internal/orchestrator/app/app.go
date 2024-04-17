@@ -6,6 +6,7 @@ import (
 	httpapp "github.com/k6mil6/distributed-calculator/internal/orchestrator/app/http"
 	authService "github.com/k6mil6/distributed-calculator/internal/orchestrator/service/auth"
 	expressionService "github.com/k6mil6/distributed-calculator/internal/orchestrator/service/expression"
+	heartbeatService "github.com/k6mil6/distributed-calculator/internal/orchestrator/service/heartbeat"
 	orchestratorService "github.com/k6mil6/distributed-calculator/internal/orchestrator/service/orchestrator"
 	timeoutService "github.com/k6mil6/distributed-calculator/internal/orchestrator/service/timeout"
 	"github.com/k6mil6/distributed-calculator/internal/storage"
@@ -29,6 +30,7 @@ func New(
 	ch chan bool,
 ) *App {
 	orchestrator := orchestratorService.New(log, storages.SubexpressionsStorage, storages.SubexpressionsStorage, ch)
+	heartbeat := heartbeatService.New(log, storages.HeartbeatsStorage)
 
 	auth := authService.New(log, storages.UsersStorage, storages.UsersStorage, tokenTTL, secret)
 	expression := expressionService.New(log, storages.ExpressionsStorage, storages.ExpressionsStorage)
@@ -36,7 +38,7 @@ func New(
 
 	httpApp := httpapp.New(ctx, log, port, auth, expression, timeout, secret)
 
-	grpcApp := grpcapp.New(log, grpcPort, orchestrator)
+	grpcApp := grpcapp.New(log, grpcPort, orchestrator, heartbeat)
 
 	return &App{
 		GRPCServer: grpcApp,

@@ -10,3 +10,4 @@ TODO:
 -[ ] responses are needed to be more presentable
 -[ ] update README with new examples
 -[ ] create .http files?
+-[ ] endpoint for getting heartbeats

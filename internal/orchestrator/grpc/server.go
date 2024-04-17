@@ -16,18 +16,26 @@ type Orchestrator interface {
 	SaveResult(ctx context.Context, subexpressionID int, result float64) (int, error)
 }
 
+type Heartbeat interface {
+	SaveHeartbeat(ctx context.Context, workerID int) error
+}
+
 type serverApi struct {
 	distributedcalculatorv1.UnimplementedOrchestratorServer
 	orchestrator Orchestrator
+	heartbeat    Heartbeat
 }
 
-func Register(gRPC *grpc.Server, orchestrator Orchestrator) {
-	distributedcalculatorv1.RegisterOrchestratorServer(gRPC, &serverApi{orchestrator: orchestrator})
+func Register(gRPC *grpc.Server, orchestrator Orchestrator, heartbeat Heartbeat) {
+	distributedcalculatorv1.RegisterOrchestratorServer(gRPC, &serverApi{
+		orchestrator: orchestrator,
+		heartbeat:    heartbeat,
+	})
 }
 
 func (s *serverApi) GetFreeExpressions(
 	ctx context.Context,
-	_ *distributedcalculatorv1.GetFreeExpressionsRequest,
+	request *distributedcalculatorv1.GetFreeExpressionsRequest,
 ) (*distributedcalculatorv1.GetFreeExpressionsResponse, error) {
 	freeExpression, err := s.orchestrator.GetFreeExpressions(ctx)
 	if err != nil {
@@ -35,6 +43,10 @@ func (s *serverApi) GetFreeExpressions(
 			return nil, status.Error(codes.NotFound, "error getting free expressions")
 		}
 		return nil, status.Error(codes.Internal, "error getting free expressions")
+	}
+
+	if request.GetWorkerID() != 0 {
+		freeExpression.WorkerId = int(request.GetWorkerID())
 	}
 
 	return &distributedcalculatorv1.GetFreeExpressionsResponse{
@@ -61,6 +73,10 @@ func (s *serverApi) SendResult(
 func (s *serverApi) SendHeartbeat(
 	ctx context.Context,
 	request *distributedcalculatorv1.SendHeartbeatRequest,
-) (*distributedcalculatorv1.SendHeartbeatResponse, error) {
-	return nil, nil
+) (*distributedcalculatorv1.Empty, error) {
+	if err := s.heartbeat.SaveHeartbeat(ctx, int(request.GetWorkerID())); err != nil {
+		return nil, status.Error(codes.Internal, "error saving heartbeat")
+	}
+
+	return &distributedcalculatorv1.Empty{}, nil
 }

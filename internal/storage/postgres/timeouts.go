@@ -60,6 +60,10 @@ func (s *TimeoutsStorage) GetActualTimeouts(context context.Context, userID int6
 	return model.Timeouts(timeouts), nil
 }
 
+func (s *TimeoutsStorage) Close() error {
+	return s.db.Close()
+}
+
 type dbTimeouts struct {
 	ID       int             `db:"id"`
 	UserID   int64           `db:"user_id"`

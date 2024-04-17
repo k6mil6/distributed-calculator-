@@ -58,14 +58,20 @@ func New(
 	}, nil
 }
 
-func (c *Client) GetFreeExpressions(ctx context.Context) (model.Subexpression, error) {
+func (c *Client) GetFreeExpressions(ctx context.Context, workerID int) (model.Subexpression, error) {
 	op := "grpc.GetFreeExpressions"
 
 	log := c.log.With(slog.String("op", op))
 
 	log.Info("requesting free expressions")
 
-	resp, err := c.api.GetFreeExpressions(ctx, &distributedcalculatorv1.GetFreeExpressionsRequest{})
+	req := &distributedcalculatorv1.GetFreeExpressionsRequest{}
+
+	if workerID != 0 {
+		req.WorkerID = int32(workerID)
+	}
+
+	resp, err := c.api.GetFreeExpressions(ctx, req)
 	if err != nil {
 		st, ok := status.FromError(err)
 		if ok {

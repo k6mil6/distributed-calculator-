@@ -312,6 +312,10 @@ func (s *SubexpressionsStorage) MakeNonTaken(context context.Context, id int) er
 	return nil
 }
 
+func (s *SubexpressionsStorage) Close() error {
+	return s.db.Close()
+}
+
 type dbSubexpression struct {
 	ID             int       `db:"id"`
 	ExpressionId   uuid.UUID `db:"expression_id"`
