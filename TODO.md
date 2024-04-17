@@ -7,7 +7,6 @@ TODO:
 -[x] add jwt logic to handlers, providing user expressions
 -[x] add userid to db
 -[ ] worker should send id in case it is already defined
--[ ] make possible to register with int password
 -[ ] responses are needed to be more presentable
 -[ ] update README with new examples
 -[ ] create .http files?
