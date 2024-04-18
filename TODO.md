@@ -11,3 +11,4 @@ TODO:
 -[ ] update README with new examples
 -[ ] create .http files?
 -[ ] endpoint for getting heartbeats
+-[ ] remake diagram 

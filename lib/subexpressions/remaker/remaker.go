@@ -6,5 +6,5 @@ import (
 )
 
 func Remake(subexpression string, id int, result float64) string {
-	return strings.ReplaceAll(subexpression, fmt.Sprintf("{%v}", id), fmt.Sprint(result))
+	return strings.ReplaceAll(subexpression, fmt.Sprintf("{%v}", id), fmt.Sprintf("%.0f", result))
 }
