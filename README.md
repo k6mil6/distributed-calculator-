@@ -15,36 +15,49 @@ postman - для удобства отправки запросов, по жел
 3. в консоле прописать docker-compose up (если оркестратор не запустился, необходимо перезапустить его, либо через интерфейс docker desktop, либо нажать ctrl+c и написать docker-compose еще раз)
 4. ниже представлены примеры для проверки работоспособности
 
+пример регистрации пользователя (mac/linux)
+```
+curl --location 'http://localhost:5441/register' \
+--header 'Content-Type: application/json' \
+--data '{"login": "your_login","password": "your_password"}'
+```
+
+windows (cmd)
+```
+curl --location "http://localhost:5441/register" ^
+--header "Content-Type: application/json" ^
+--data "{\"login\": \"your_login\",\"password\": \"your_password\"}"
+```
+
+пример авторизации (mac/linux)
+```
+curl --location 'http://localhost:5441/login' \
+--header 'Content-Type: application/json' \
+--data '{"login": "your_login","password": "your_password"}'
+```
+
+windows (cmd)
+```
+curl --location "http://localhost:5441/login" ^
+--header "Content-Type: application/json" ^
+--data "{\"login\": \"kamil\",\"password\": \"12345\"}"
+```
+
 пример вычисления выражения с передачей таймаутов (mac/linux)
+(token - получаем в ответе на авторизацию)
 ```
 curl --location 'http://localhost:5441/calculate' \
 --header 'Content-Type: application/json' \
---data '{
-    "id": "3422b448-2460-4fd2-9183-8000de6f8348",
-    "expression": "2+2+3",
-    "timeouts": {
-        "+": 10,
-        "-": 20,
-        "/": 10,
-        "*": 5
-    }
-}'
+--header 'Authorization: Bearer your_token' \
+--data '{"id": "3422b448-2460-4fd2-9183-8000de6f8348","expression": "2+2+3","timeouts": {"+": 10,"-": 20,"/": 10,"*": 5}}'
 ```
-windows (powershell)
-```
-$body = @{
-    id = "3422b448-2460-4fd2-9183-8000de6f8348"
-    expression = "2+2+3"
-    timeouts = @{
-        "+" = 10
-        "-" = 20
-        "/" = 10
-        "*" = 5
-    }
-} | ConvertTo-Json -Compress
 
-$response = Invoke-WebRequest -Uri 'http://localhost:5441/calculate' -Method Post -ContentType 'application/json' -Body $body
-Write-Output $response.Content
+windows (cmd)
+```
+curl --location "http://localhost:5441/calculate" ^
+--header "Content-Type: application/json" ^
+--header "Authorization: Bearer your_token" ^
+--data "{\"id\": \"e58ed763-928c-4155-bee9-fdbaaadc15f4\", \"expression\": \"2-2*2*10000\",\"timeouts\": {\"+\": 10,\"-\": 20,\"/\": 20,\"*\": 20}}"
 ```
 
 timeouts - параметр, который можно не указывать, будет использовано последнее добавленное значение
