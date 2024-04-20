@@ -1,0 +1,230 @@
+{
+	"info": {
+		"_postman_id": "12ab56e1-14f4-48f4-a90b-7f869f0ee9af",
+		"name": "calculator",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29718593"
+	},
+	"item": [
+		{
+			"name": "register",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"login\": \"login\",\r\n    \"password\": \"password\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5441/register",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5441",
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "calculate",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTMzODE5OTksImlkIjoxLCJsb2dpbiI6ImthbWlsIn0.Ud4ss3qe7Xhb1UfAVwQrydNPBUoy7ssqBR1hf6-kWRI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"id\": \"e58ed763-928c-4155-bee9-fdbaaadc15f6\",\r\n    \"expression\": \"2*10000*2000*4234234\",\r\n    \"timeouts\": {\r\n        \"+\": 10,\r\n        \"-\": 20,\r\n        \"/\": 20,\r\n        \"*\": 20\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5441/calculate",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5441",
+					"path": [
+						"calculate"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "login",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"login\": \"login\",\r\n    \"password\": \"password\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5441/login",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5441",
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "set_timeouts",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTMzODE5OTksImlkIjoxLCJsb2dpbiI6ImthbWlsIn0.Ud4ss3qe7Xhb1UfAVwQrydNPBUoy7ssqBR1hf6-kWRI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"timeouts\": {\r\n        \"+\": 10, \r\n        \"-\": 10,\r\n        \"*\": 10,\r\n        \"/\": 10\r\n    }\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:5441/set_timeouts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5441",
+					"path": [
+						"set_timeouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "expression",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTMzODE5OTksImlkIjoxLCJsb2dpbiI6ImthbWlsIn0.Ud4ss3qe7Xhb1UfAVwQrydNPBUoy7ssqBR1hf6-kWRI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5441/expression/e58ed763-928c-4155-bee9-fdbaaadc15f4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5441",
+					"path": [
+						"expression",
+						"e58ed763-928c-4155-bee9-fdbaaadc15f4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "actual_timeouts",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTMyOTY5NzUsImlkIjoxLCJsb2dpbiI6ImthbWlsIn0.RIVFyC2qnzb2egeDIh2fGWNBeGeAiBAUbYTSOj9G_uI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5441/actual_timeouts",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5441",
+					"path": [
+						"actual_timeouts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "all_expressions",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTMzODE5OTksImlkIjoxLCJsb2dpbiI6ImthbWlsIn0.Ud4ss3qe7Xhb1UfAVwQrydNPBUoy7ssqBR1hf6-kWRI",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:5441/all_expressions",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "5441",
+					"path": [
+						"all_expressions"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

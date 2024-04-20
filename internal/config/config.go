@@ -10,13 +10,13 @@ import (
 
 type Config struct {
 	Env                 string        `hcl:"env" env:"ENV" default:"local"`
-	PostgresDatabaseDSN string        `hcl:"database_dsn" env:"DB_DSN" default:"postgres://postgres:postgres@localhost:5442/calc_db?sslmode=disable"`
+	PostgresDatabaseDSN string        `hcl:"postgres_database_dsn" env:"POSTGRES_DB_DSN" default:"postgres://postgres:postgres@localhost:5442/calc_db?sslmode=disable"`
 	RedisDatabaseDSN    string        `hcl:"redis_dsn" env:"REDIS_DSN" default:"redis://default:redis@localhost:6379/0"`
 	FetcherInterval     time.Duration `hcl:"fetcher_interval" env:"FETCHER_INTERVAL" default:"10s"`
 	CheckerInterval     time.Duration `hcl:"checker_interval" env:"CHECKER_INTERVAL" default:"10s"`
 	MigrationPath       string        `hcl:"migration_path" env:"MIGRATION_PATH" default:"./internal/storage/migrations"`
 	GrpcPort            int           `hcl:"grpc_port" env:"GRPC_PORT" default:"50051"`
-	HttpPort            int           `hcl:"http_port" env:"HTTP_PORT" default:"8080"`
+	HttpPort            int           `hcl:"http_port" env:"HTTP_PORT" default:"5441"`
 
 	HeartbeatTimeout     time.Duration `hcl:"heartbeat_timeout" env:"HEARTBEAT_TIMEOUT" default:"30s"`
 	GoroutineNumber      int           `hcl:"goroutine_number" env:"GOROUTINE_NUMBER" default:"5"`
@@ -27,6 +27,9 @@ type Config struct {
 
 	TokenTTL time.Duration `hcl:"token_ttl" env:"TOKEN_TTL" default:"1h"`
 	Secret   string        `hcl:"secret" env:"SECRET" default:"secret"`
+
+	DBRetriesNumber int           `hcl:"db_retries_number" env:"DB_RETRIES_NUMBER" default:"5"`
+	DBRetryCooldown time.Duration `hcl:"db_retry_cooldown" env:"DB_RETRY_COOLDOWN" default:"5s"`
 }
 
 var (

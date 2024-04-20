@@ -7,6 +7,7 @@ import (
 	"github.com/k6mil6/distributed-calculator/internal/storage/redis/heartbeats"
 	"io"
 	"reflect"
+	"time"
 )
 
 type Storages struct {
@@ -17,15 +18,30 @@ type Storages struct {
 	HeartbeatsStorage     *heartbeats.Storage
 }
 
-func New(postgresConnectionString, redisConnectionString string) (Storages, error) {
-	db, err := sqlx.Connect("postgres", postgresConnectionString)
+func New(postgresConnectionString, redisConnectionString string, maxRetries int, retryCooldown time.Duration) (Storages, error) {
+	var db *sqlx.DB
+	var err error
+	for i := 0; i < maxRetries; i++ {
+		db, err = sqlx.Connect("postgres", postgresConnectionString)
+		if err == nil {
+			break
+		}
+		time.Sleep(retryCooldown)
+	}
 	if err != nil {
-		return Storages{}, err
+		return Storages{}, fmt.Errorf("failed to connect to postgres after %d retries: %w", maxRetries, err)
 	}
 
-	heartbeatsRdb, err := heartbeats.NewStorage(redisConnectionString)
+	var heartbeatsRdb *heartbeats.Storage
+	for i := 0; i < maxRetries; i++ {
+		heartbeatsRdb, err = heartbeats.NewStorage(redisConnectionString)
+		if err == nil {
+			break
+		}
+		time.Sleep(retryCooldown)
+	}
 	if err != nil {
-		return Storages{}, err
+		return Storages{}, fmt.Errorf("failed to connect to redis after %d retries: %w", maxRetries, err)
 	}
 
 	return Storages{

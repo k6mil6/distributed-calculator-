@@ -4,12 +4,8 @@ import (
 	"context"
 	"github.com/k6mil6/distributed-calculator/internal/config"
 	"github.com/k6mil6/distributed-calculator/internal/orchestrator/app"
-	"github.com/k6mil6/distributed-calculator/internal/orchestrator/checker"
-	"github.com/k6mil6/distributed-calculator/internal/orchestrator/fetcher"
-	"github.com/k6mil6/distributed-calculator/internal/orchestrator/finaliser"
 	"github.com/k6mil6/distributed-calculator/internal/storage"
 	"github.com/k6mil6/distributed-calculator/lib/logger"
-	_ "github.com/lib/pq"
 	"log/slog"
 	"os"
 	"os/signal"
@@ -37,15 +33,7 @@ func main() {
 		}
 	}()
 
-	f := fetcher.New(storages.ExpressionsStorage, storages.SubexpressionsStorage, cfg.FetcherInterval, log)
-	c := checker.New(storages.SubexpressionsStorage, cfg.CheckerInterval, log)
-	fin := finaliser.New(log, storages.SubexpressionsStorage, storages.ExpressionsStorage)
-
 	ch := make(chan bool, 1)
-
-	go f.Start(ctx)
-	go c.Start(ctx)
-	go fin.Start(ctx, ch)
 
 	application := app.New(
 		ctx,
@@ -59,12 +47,8 @@ func main() {
 	)
 
 	go func() {
-		application.GRPCServer.MustRun()
+		application.HTTPServer.MustRun()
 	}()
 
 	<-ctx.Done()
-
-	application.GRPCServer.Stop()
-	log.Info("gRPC server stopped")
-	log.Info("server stopped")
 }

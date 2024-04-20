@@ -1,7 +1,11 @@
-#database_dsn = "postgresql://postgres:postgres@db:5432/calc_db?sslmode=disable"
-#env = "dev"
-#orchestrator_url = "http://orchestrator:5432"
-#goroutine_number = 5
-#worker_timeout = "30s"
-#heartbeat_timeout = "30s"
-#fetcher_interval = "10s"
+postgres_database_dsn = "postgresql://postgres:postgres@postgres:5432/calc_db?sslmode=disable"
+redis_dsn = "redis://default:redis@redis:6379/0"
+env = "dev"
+grpc_server_address = "orchestrator:50051"
+goroutine_number = 5
+worker_timeout = "30s"
+heartbeat_timeout = "30s"
+fetcher_interval = "10s"
+secret="abcdeqrte3"
+token_ttl = "15m"
+migration_path = "./migrations"
