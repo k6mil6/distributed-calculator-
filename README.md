@@ -10,9 +10,9 @@
 
 Для проверки задания потребуется установленные 
 
-[docker](https://docs.docker.com/get-docker/) и [git](https://git-scm.com/downloads)
-
-[postman](https://www.postman.com/downloads/) - для удобства отправки запросов, по желанию 
+- [docker](https://docs.docker.com/get-docker/) 
+- [git](https://git-scm.com/downloads)
+- [postman](https://www.postman.com/downloads/) - для удобства отправки запросов, по желанию 
 (в папке examples/postman лежит файл, который можно импортировать в постман и получить примеры запросов, в postman jwt token устанавливается при настройке запроса во вкладке Authorisation, type bearer token)
 
 Для развертывания приложения необходимо:
