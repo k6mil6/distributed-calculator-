@@ -2,6 +2,12 @@
 
 [Диаграмма](https://excalidraw.com/#json=iTZfpCq_xgxifx-g8BRbR,VzcX5ZcA6IDuZUEc26rx5A), как тут всё работает
 
+Компоненты:
+- migrator - для применения миграций
+- http_server - для взаимодействия с пользователем
+- orchestrator - сохраняет, делит выражения на подвыражения, предоставляет воркерам подвыражения по grpc
+- agent - содержит в себе указанное в конфиге кол-во воркеров 
+
 Для проверки задания потребуется установленные 
 
 [docker](https://docs.docker.com/get-docker/) и [git](https://git-scm.com/downloads)
