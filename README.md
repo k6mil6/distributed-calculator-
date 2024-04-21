@@ -1,12 +1,12 @@
 # По всем вопросам tg - @kamil_66
 
-Диаграмма, как тут всё работает
-https://excalidraw.com/#json=gWoBa-VziAJJz358b8HIG,b2P-xXy_aJ3oYZj25ndl1Q
+[Диаграмма](https://excalidraw.com/#json=iTZfpCq_xgxifx-g8BRbR,VzcX5ZcA6IDuZUEc26rx5A), как тут всё работает
 
 Для проверки задания потребуется установленные 
 
-docker (https://docs.docker.com/get-docker/) и git (https://git-scm.com/downloads)
-postman - для удобства отправки запросов, по желанию (https://www.postman.com/downloads/)
+[docker](https://docs.docker.com/get-docker/) и [git](https://git-scm.com/downloads)
+
+[postman](https://www.postman.com/downloads/) - для удобства отправки запросов, по желанию 
 (в папке examples/postman лежит файл, который можно импортировать в постман и получить примеры запросов, в postman jwt token устанавливается при настройке запроса во вкладке Authorisation, type bearer token)
 
 Для развертывания приложения необходимо:
@@ -14,7 +14,7 @@ postman - для удобства отправки запросов, по жел
 1. клонировать репозиторий в удобную папку (git clone https://github.com/k6mil6/distributed-calculator.git .)
 2. перейти в папку
 3. в консоле прописать docker-compose up (если оркестратор не запустился, необходимо перезапустить его, либо через интерфейс docker desktop, либо нажать ctrl+c и написать docker-compose еще раз)
-4. ниже представлены примеры для проверки работоспособности
+4. ниже представлены примеры для проверки работоспособности (в папке examples/curl лежат последующие примеры, но с разными значениями)
 
 пример регистрации пользователя (mac/linux)
 ```
